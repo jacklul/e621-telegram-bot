@@ -1,0 +1,43 @@
+<?php
+/**
+ * This file is part of the e621 Search Lite project.
+ *
+ * (c) Jack'lul <jacklulcat@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Longman\TelegramBot\Commands\UserCommands;
+
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
+
+class HelpCommand extends UserCommand
+{
+    /**
+     * @return \Longman\TelegramBot\Entities\ServerResponse
+     * @throws \Longman\TelegramBot\Exception\TelegramException
+     */
+    public function execute()
+    {
+        $text[] = '*Help*';
+        $text[] = PHP_EOL . '*Inline search*:' . PHP_EOL . ' Type in any chat:  `@' . $this->getTelegram()->getBotUsername() . ' <tags>`  and wait for the results to appear';
+        $text[] = PHP_EOL . '*Random image*:' . PHP_EOL . ' Send tags as a text message or use  `/random <tags>`  command';
+        $text[] = PHP_EOL . '*Image to post URL conversion*:' . PHP_EOL . ' Send e621 image link';
+        $text[] = PHP_EOL . '*Reverse image search*:' . PHP_EOL . ' Send image link or photo message';
+
+        $data = [
+            'chat_id'                  => $this->getMessage()->getChat()->getId(),
+            'text'                     => implode(PHP_EOL, $text),
+            'parse_mode'               => 'markdown',
+            'disable_web_page_preview' => true,
+        ];
+
+        if (!$this->getMessage()->getChat()->isPrivateChat()) {
+            $data['reply_to_message_id'] = $this->getMessage()->getMessageId();
+        }
+
+        return Request::sendMessage($data);
+    }
+}

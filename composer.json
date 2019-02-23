@@ -1,0 +1,31 @@
+{
+  "name": "jacklul/e621-telegram-bot",
+  "type": "project",
+  "description": "Simple e621 bot for Telegram",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jack'lul",
+      "email": "jacklulcat@gmail.com",
+      "homepage": "https://jacklul.github.io",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.9",
+    "jacklul/e621-api": "^0.5.1",
+    "longman/telegram-bot": "^0.53.0"
+  },
+  "require-dev": {
+    "vlucas/phpdotenv": "^3.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "jacklul\\e621bot\\": "src/"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true
+  }
+}
