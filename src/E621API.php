@@ -58,7 +58,7 @@ class E621API
         self::init();
 
         if (self::$api === null) {
-            throw new \RuntimeException('E621 instance not initialized - this should\'nt happen');
+            throw new \RuntimeException('E621 instance not initialized - this shouldn\'t happen');
         }
 
         return self::$api;
