@@ -32,6 +32,8 @@ class TelegramBot extends Telegram
      */
     public function __construct($api_key, $bot_username = '', $isGae = false)
     {
+        parent::__construct($api_key, $bot_username);
+
         $this->user_agent = 'Telegram Bot: @' . $bot_username;
         $options = [
             'timeout' => 10,
@@ -65,8 +67,6 @@ class TelegramBot extends Telegram
         }
 
         E621API::construct($options);
-
-        parent::__construct($api_key, $bot_username);
     }
 
     /**
