@@ -36,7 +36,7 @@ class TelegramBot extends Telegram
 
         $this->user_agent = 'Telegram Bot: @' . $bot_username;
         $options = [
-            'timeout' => 10,
+            'timeout' => 15,
             'headers' => [
                 'User-Agent' => $this->user_agent,
             ],
