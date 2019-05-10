@@ -31,22 +31,24 @@ class GenericmessageCommand extends SystemCommand
      */
     public function execute()
     {
-        $text = $this->getMessage()->getText(true);
+        if ($this->getMessage()->getChat()->isPrivateChat()) {
+            $text = $this->getMessage()->getText(true);
 
-        if ($this->isUrl($text)) {
-            if (preg_match("/e621\.net/", $text) || preg_match('/e926\\.net/', $text)) {
-                return $this->md5Search(preg_replace('/^.*([a-f0-9]{32}).*$/', '$1', $text));   // Image is from e621/e926 domain - MD5 lookup
+            if ($this->isUrl($text)) {
+                if (preg_match("/e621\.net/", $text) || preg_match('/e926\\.net/', $text)) {
+                    return $this->md5Search(preg_replace('/^.*([a-f0-9]{32}).*$/', '$1', $text));   // Image is from e621/e926 domain - MD5 lookup
+                }
+
+                return $this->reverseSearch($text);     // non-e621 url found, reverse search using image url
             }
 
-            return $this->reverseSearch($text);     // non-e621 url found, reverse search using image url
-        }
+            if ((($object = $this->getMessage()->getPhoto()) || ($object = $this->getMessage()->getDocument())) && !preg_match('/e621\\.net.*\\/show\\/(\\d+)/', trim($this->getMessage()->getCaption()))) {
+                return $this->reverseSearch($object);     // message contains photo/document and has no e621 url in caption (results posted from inline search)
+            }
 
-        if ((($object = $this->getMessage()->getPhoto()) || ($object = $this->getMessage()->getDocument())) && !preg_match('/e621\\.net.*\\/show\\/(\\d+)/', trim($this->getMessage()->getCaption()))) {
-            return $this->reverseSearch($object);     // message contains photo/document and has no e621 url in caption (results posted from inline search)
-        }
-
-        if (!$this->isUrl($text) && !$this->isUrl($this->getMessage()->getCaption())) {
-            return $this->getTelegram()->executeCommand('random');  // message is just text, try to make /random search
+            if (!$this->isUrl($text) && !$this->isUrl($this->getMessage()->getCaption())) {
+                return $this->getTelegram()->executeCommand('random');  // message is just text, try to make /random search
+            }
         }
 
         return Request::emptyResponse();
