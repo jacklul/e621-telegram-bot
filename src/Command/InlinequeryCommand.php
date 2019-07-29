@@ -10,14 +10,14 @@
 
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use jacklul\E621API\Entity\Post;
 use jacklul\e621bot\E621API;
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultGif;
 use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultPhoto;
-//use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultVideo;
-//use Longman\TelegramBot\Entities\InputMessageContent\InputTextMessageContent;
 use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultVideo;
 use Longman\TelegramBot\Entities\InputMessageContent\InputTextMessageContent;
+use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
 
@@ -27,8 +27,7 @@ class InlinequeryCommand extends SystemCommand
     const MAX_PHOTO_FILE_SIZE = 5242880;   //  5 MB
 
     /**
-     * @return \Longman\TelegramBot\Entities\ServerResponse
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse
      */
     public function execute()
     {
@@ -69,7 +68,7 @@ class InlinequeryCommand extends SystemCommand
             $contents = [];
 
             if (count($results) > 0) {
-                /** @var \jacklul\E621API\Entity\Post $image */
+                /** @var Post $image */
                 foreach ($results as $image) {
                     $element = null;
 

@@ -10,18 +10,21 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
+use jacklul\E621API\Entity\Post;
 use jacklul\e621bot\E621API;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
+use Longman\TelegramBot\Entities\ServerResponse;
+use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
 
 class RandomCommand extends UserCommand
 {
     /**
-     * @return \Longman\TelegramBot\Entities\ServerResponse
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse
+     * @throws TelegramException
      */
     public function execute()
     {
@@ -69,7 +72,7 @@ class RandomCommand extends UserCommand
                 );
             }
 
-            /** @var \jacklul\E621API\Entity\Post $image */
+            /** @var Post $image */
             $image = $results[0];
 
             $image_url = '[Image](' . $image->getFileUrl() . '), ';

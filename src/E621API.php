@@ -10,8 +10,10 @@
 
 namespace jacklul\e621bot;
 
+use InvalidArgumentException;
 use jacklul\E621API\E621;
 use Longman\TelegramBot\TelegramLog;
+use RuntimeException;
 
 class E621API
 {
@@ -28,7 +30,7 @@ class E621API
     /**
      * @param array $custom_options
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function construct(array $custom_options = [])
     {
@@ -36,17 +38,14 @@ class E621API
     }
 
     /**
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private static function init()
     {
         if (self::$api === null) {
             self::$api = new E621(self::$custom_options);
             self::$api->throwExceptions(false);
-
-            if (TelegramLog::isDebugLogActive()) {
-                self::$api->setDebugLogHandler('\Longman\TelegramBot\TelegramLog::debug');
-            }
+            self::$api->setDebugLogHandler(static function($message){ TelegramLog::debug($message); });
         }
     }
 
@@ -58,7 +57,7 @@ class E621API
         self::init();
 
         if (self::$api === null) {
-            throw new \RuntimeException('E621 instance not initialized - this shouldn\'t happen');
+            throw new RuntimeException('E621 instance not initialized - this shouldn\'t happen');
         }
 
         return self::$api;

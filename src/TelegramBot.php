@@ -10,6 +10,7 @@
 
 namespace jacklul\e621bot;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\StreamHandler;
 use Longman\TelegramBot\Exception\TelegramException;
@@ -71,7 +72,7 @@ class TelegramBot extends Telegram
 
     /**
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle()
     {
@@ -99,14 +100,14 @@ class TelegramBot extends Telegram
     /**
      * Informs user about unhandled bot error
      *
-     * @param \Exception $exception
+     * @param Exception $exception
      */
     public function notifyUser($exception)
     {
         if ($update = $this->update) {
             $text = 'Unhandled error occurred.';
 
-            if ($exception instanceof \Exception && $this->isAdmin()) {
+            if ($exception instanceof Exception && $this->isAdmin()) {
                 $text = str_replace('Please review your bot name and API key.', '', $exception->getMessage());
             }
 
@@ -143,7 +144,7 @@ class TelegramBot extends Telegram
                         ]
                     );
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Do nothing...
             }
         }

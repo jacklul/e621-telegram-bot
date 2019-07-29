@@ -14,7 +14,7 @@
   "require": {
     "php": ">=5.5.9",
     "jacklul/e621-api": "^0.5.1",
-    "longman/telegram-bot": "^0.53.0"
+    "longman/telegram-bot": "^0.59.0"
   },
   "require-dev": {
     "vlucas/phpdotenv": "^3.3"

@@ -11,13 +11,15 @@
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
+use Longman\TelegramBot\Entities\ServerResponse;
+use Longman\TelegramBot\Exception\TelegramException;
 
 /** @noinspection PhpUndefinedClassInspection */
 class SupergroupchatcreatedCommand extends SystemCommand
 {
     /**
-     * @return \Longman\TelegramBot\Entities\ServerResponse|mixed
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse|mixed
+     * @throws TelegramException
      */
     public function execute()
     {

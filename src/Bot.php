@@ -11,12 +11,15 @@
 namespace jacklul\e621bot;
 
 use Dotenv\Dotenv;
+use Exception;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Logger;
+use RuntimeException;
+use Throwable;
 
 class Bot
 {
@@ -26,12 +29,12 @@ class Bot
     private $telegram;
 
     /**
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function __construct()
     {
         if (!defined('ROOT_PATH')) {
-            throw new \RuntimeException('ROOT_PATH is not defined');
+            throw new RuntimeException('ROOT_PATH is not defined');
         }
 
         ini_set('display_errors', false);
@@ -43,8 +46,8 @@ class Bot
     }
 
     /**
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws Exception
+     * @throws Throwable
      */
     public function run()
     {
@@ -94,11 +97,16 @@ class Bot
         $this->telegram = new TelegramBot(getenv('BOT_API_KEY'), $bot_username, $this->isGae());
 
         $logger = new Logger($bot_username);
+        $level = Logger::ERROR;
+
+        if ((bool)getenv('DEBUG') === true) {
+            $level = Logger::DEBUG;
+        }
 
         if ($this->isGae()) {
-            $logger->pushHandler(new SyslogHandler($bot_username, LOG_USER, Logger::ERROR));   // Log to syslog
+            $logger->pushHandler(new SyslogHandler($bot_username, LOG_USER, $level));   // Log to syslog
         } else {
-            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, Logger::ERROR));   // Log to PHP error_log
+            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));   // Log to PHP error_log
         }
 
         TelegramLog::initialize($logger);
@@ -157,10 +165,10 @@ class Bot
                 $update_count = count($server_response->getResult());
 
                 if ($update_count > 0) {
-                    print 'Processed ' . $update_count . ' updates' . PHP_EOL;
+                    print PHP_EOL . 'Processed ' . $update_count . ' updates' . PHP_EOL;
                 }
             } else {
-                print 'Failed to process updates, error: ' . $server_response->getDescription() . PHP_EOL;
+                print PHP_EOL . 'Failed to process updates, error: ' . $server_response->getDescription() . PHP_EOL;
             }
 
             sleep(1);
@@ -173,7 +181,7 @@ class Bot
     private function setWebhook()
     {
         if (empty($webhook_url = getenv('BOT_WEBHOOK'))) {
-            throw new \RuntimeException('BOT_WEBHOOK is not set');
+            throw new RuntimeException('BOT_WEBHOOK is not set');
         }
 
         $result = $this->telegram->setWebhook(
@@ -192,7 +200,7 @@ class Bot
     }
 
     /**
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @throws TelegramException
      */
     private function deleteWebhook()
     {

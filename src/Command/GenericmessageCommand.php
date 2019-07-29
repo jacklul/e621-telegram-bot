@@ -17,8 +17,11 @@ use jacklul\e621bot\E621API;
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\Document;
 use Longman\TelegramBot\Entities\PhotoSize;
+use Longman\TelegramBot\Entities\ServerResponse;
+use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
+use RuntimeException;
 
 /** @noinspection PhpUndefinedClassInspection */
 class GenericmessageCommand extends SystemCommand
@@ -26,8 +29,8 @@ class GenericmessageCommand extends SystemCommand
     const MAX_RESULTS = 5;
 
     /**
-     * @return \Longman\TelegramBot\Entities\ServerResponse
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse
+     * @throws TelegramException
      */
     public function execute()
     {
@@ -81,8 +84,8 @@ class GenericmessageCommand extends SystemCommand
     /**
      * @param $md5
      *
-     * @return \Longman\TelegramBot\Entities\ServerResponse
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse
+     * @throws TelegramException
      */
     private function md5Search($md5)
     {
@@ -142,8 +145,8 @@ class GenericmessageCommand extends SystemCommand
     /**
      * @param string|array|Document $data
      *
-     * @return \Longman\TelegramBot\Entities\ServerResponse
-     * @throws \Longman\TelegramBot\Exception\TelegramException
+     * @return ServerResponse
+     * @throws TelegramException
      */
     private function reverseSearch($data = null)
     {
@@ -175,7 +178,7 @@ class GenericmessageCommand extends SystemCommand
                 } elseif ($data instanceof Document) {
                     $file_id = $data->getFileId();
                 } else {
-                    throw new \RuntimeException('No file provided');
+                    throw new RuntimeException('No file provided');
                 }
 
                 $result = Request::getFile(['file_id' => $file_id]);
@@ -251,8 +254,8 @@ class GenericmessageCommand extends SystemCommand
             }
 
             $matches = [];
-            for ($i = 0, $iMax = count($results); $i < $iMax; $i++) {
-                $matches[] = '[' . $results[$i] . '](' . $results[$i] . ')';
+            foreach ($results as $iValue) {
+                $matches[] = '[' . $iValue . '](' . $iValue . ')';
             }
 
             $text .= ' ' . implode(PHP_EOL . ' ', $matches);
