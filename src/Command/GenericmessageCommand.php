@@ -160,7 +160,7 @@ class GenericmessageCommand extends SystemCommand
                     'headers'  => [
                         'User-Agent' => $this->getTelegram()->getUserAgent(),
                     ],
-                    'timeout'  => 15,
+                    'timeout'  => 30,
                     'handler'  => new StreamHandler(),
                     'verify'   => false,
                 ]
