@@ -45,7 +45,7 @@ class E621API
         if (self::$api === null) {
             self::$api = new E621(self::$custom_options);
             self::$api->throwExceptions(false);
-            self::$api->setDebugLogHandler(static function($message){ TelegramLog::debug($message); });
+            self::$api->setDebugLogHandler(static function($message) { TelegramLog::debug($message); });
         }
     }
 
