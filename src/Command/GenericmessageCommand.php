@@ -34,8 +34,14 @@ class GenericmessageCommand extends SystemCommand
      */
     public function execute()
     {
-        if ($this->getMessage()->getChat()->isPrivateChat()) {
-            $text = $this->getMessage()->getText(true);
+        $message = $this->getMessage();
+
+        if ($message->getGroupChatCreated() || $message->getSupergroupChatCreated()) {
+            return $this->getTelegram()->executeCommand('start');
+        }
+
+        if ($message->getChat()->isPrivateChat()) {
+            $text = $message->getText(true);
 
             if ($this->isUrl($text)) {
                 if (preg_match("/e621\.net/", $text) || preg_match('/e926\\.net/', $text)) {
@@ -45,11 +51,11 @@ class GenericmessageCommand extends SystemCommand
                 return $this->reverseSearch($text);     // non-e621 url found, reverse search using image url
             }
 
-            if ((($object = $this->getMessage()->getPhoto()) || ($object = $this->getMessage()->getDocument())) && !preg_match('/e621\\.net.*\\/show\\/(\\d+)/', trim($this->getMessage()->getCaption()))) {
+            if ((($object = $message->getPhoto()) || ($object = $message->getDocument())) && !preg_match('/e621\\.net.*\\/show\\/(\\d+)/', trim($message->getCaption()))) {
                 return $this->reverseSearch($object);     // message contains photo/document and has no e621 url in caption (results posted from inline search)
             }
 
-            if (!$this->isUrl($text) && !$this->isUrl($this->getMessage()->getCaption())) {
+            if (!$this->isUrl($text) && !$this->isUrl($message->getCaption())) {
                 return $this->getTelegram()->executeCommand('random');  // message is just text, try to make /random search
             }
         }
