@@ -91,7 +91,7 @@ class InlinequeryCommand extends SystemCommand
                                 'thumb_url'    => $image['preview']['url'],
                                 'photo_width'  => $image['file']['width'],
                                 'photo_height' => $image['file']['height'],
-                                'caption'      => 'https://e621.net/post/show/' . $image['id'],
+                                'caption'      => 'https://e621.net/posts/' . $image['id'],
                                 'title'        => 'Post #' . $image['id'],
                                 'description'  => '(' . $image['file']['ext'] . ')',
                             ]
@@ -105,7 +105,7 @@ class InlinequeryCommand extends SystemCommand
                                 'thumb_url'   => $image['preview']['url'],
                                 'gif_width'   => $image['file']['width'],
                                 'gif_height'  => $image['file']['height'],
-                                'caption'     => 'https://e621.net/post/show/' . $image['id'],
+                                'caption'     => 'https://e621.net/posts/' . $image['id'],
                                 'title'       => 'Post #' . $image['id'],
                                 'description' => '(' . $image['file']['ext'] . ')',
                             ]
@@ -120,12 +120,12 @@ class InlinequeryCommand extends SystemCommand
                                 'thumb_url'             => $image['preview']['url'],
                                 'video_width'           => $image['file']['width'],
                                 'video_height'          => $image['file']['height'],
-                                'caption'               => 'https://e621.net/post/show/' . $image['id'],
+                                'caption'               => 'https://e621.net/posts/' . $image['id'],
                                 'title'                 => 'Post #' . $image['id'],
                                 'description'           => '(' . $image['file']['ext'] . ')',
                                 'input_message_content' => new InputTextMessageContent(
                                     [
-                                        'message_text' => 'https://e621.net/post/show/' . $image['id'],
+                                        'message_text' => 'https://e621.net/posts/' . $image['id'],
                                     ]
                                 ),
                             ]

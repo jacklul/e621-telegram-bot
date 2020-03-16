@@ -86,7 +86,7 @@ class RandomCommand extends UserCommand
             $data = [
                 'chat_id'             => $chat_id,
                 'reply_to_message_id' => $message_id,
-                'text'                => $image_url . '[Post](https://e621.net/post/show/' . $image['id'] . ')' .
+                'text'                => $image_url . '[Post](https://e621.net/posts/' . $image['id'] . ')' .
                     ', Score: *' . $image['score']['total'] . '*, Favorites: *' . $image['fav_count'] .
                     '*, Rating: *' . ucfirst($this->parseRating($image['rating'])) . '*',
                 'parse_mode'          => 'markdown',

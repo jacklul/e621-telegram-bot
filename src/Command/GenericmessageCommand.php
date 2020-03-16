@@ -144,7 +144,7 @@ class GenericmessageCommand extends SystemCommand
             [
                 'chat_id'                  => $this->getMessage()->getChat()->getId(),
                 'reply_to_message_id'      => $this->getMessage()->getMessageId(),
-                'text'                     => '*Post:* https://e621.net/post/show/' . $post_id,
+                'text'                     => '*Post:* https://e621.net/posts/' . $post_id,
                 'parse_mode'               => 'markdown',
                 'disable_web_page_preview' => true,
             ]
