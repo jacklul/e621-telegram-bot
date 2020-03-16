@@ -226,6 +226,8 @@ class GenericmessageCommand extends SystemCommand
             $raw_result = $e->getMessage();
         }
 
+        print_r($raw_result);
+
         $json_result = json_decode($raw_result, true);
 
         if (is_array($json_result) && count($json_result) > 0 && isset($json_result[0]['post_id'])) {
@@ -237,8 +239,8 @@ class GenericmessageCommand extends SystemCommand
             $results = count($results) > self::MAX_RESULTS ? array_slice($results, 0, self::MAX_RESULTS) : $results;
         }
 
-        if (strpos($raw_result, 'An unexpected error occurred.') !== false) {
-            $results = ['error' => 'Only search using a link works currently (e621.net/iqdb_queries)'];
+        if (strpos($raw_result, 'An unexpected error occurred') !== false) {
+            $results = ['error' => 'Only search using a link works currently'];
         }
 
         if (!isset($results) || !is_array($results) || isset($results['error'])) {
@@ -246,7 +248,7 @@ class GenericmessageCommand extends SystemCommand
                 [
                     'chat_id'             => $this->getMessage()->getChat()->getId(),
                     'reply_to_message_id' => $this->getMessage()->getMessageId(),
-                    'text'                => '*Error:* ' . (isset($results) ? $results['error'] : 'Unhandled error occurred - service might be unreachable or returned an error (e621.net/iqdb_queries)'),
+                    'text'                => '*Error:* ' . (isset($results) ? $results['error'] : 'Unhandled error occurred - service might be unreachable or returned an error'),
                     'parse_mode'          => 'markdown',
                 ]
             );
