@@ -52,7 +52,7 @@ class GenericmessageCommand extends SystemCommand
                 return $this->reverseSearch($text);     // non-e621 url found, reverse search using image url
             }
 
-            if ((($object = $message->getPhoto()) || ($object = $message->getDocument())) && !preg_match('/e621\\.net.*\\/show\\/(\\d+)/', trim($message->getCaption()))) {
+            if ((($object = $message->getPhoto()) || ($object = $message->getDocument())) && !preg_match('/e621\\.net.*\\/(show|posts)\\/(\\d+)/', trim($message->getCaption()))) {
                 return $this->reverseSearch($object);     // message contains photo/document and has no e621 url in caption (results posted from inline search)
             }
 
