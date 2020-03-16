@@ -48,13 +48,12 @@ class RandomCommand extends UserCommand
             ];
         }
 
-        $api = E621API::getApi();
-        $request = $api->postIndex(['tags' => 'order:random ' . $text, 'limit' => 1]);
+        /** @var E621API $api */
+        $api = $this->getTelegram()->getE621();
+        $request = $api->posts(['tags' => 'order:random ' . $text, 'limit' => 1]);
 
-        if ($request->isSuccessful()) {
-            $results = $request->getResult();
-
-            if (count($results) === 0) {
+        if (isset($request['result'])) {
+            if (count($request['result']['posts']) === 0) {
                 if (isset($callback_query_data)) {
                     $callback_query_data['text'] = 'No posts matched your search.';
                     $callback_query_data['show_alert'] = true;
@@ -73,19 +72,23 @@ class RandomCommand extends UserCommand
             }
 
             /** @var Post $image */
-            $image = $results[0];
+            $image = $request['result']['posts'][0];
 
-            $image_url = '[Image](' . $image->getFileUrl() . '), ';
-            if ($image->getFileSize() > 5242880) {
-                $image_url = '[Sample](' . $image->getSampleUrl() . '), ' . $image_url;
+            $image_url = '';
+            if (isset($image['file']['url'])) {
+                $image_url = '[Image](' . $image['file']['url'] . '), ';
+
+                if ($image['file']['size'] > 5242880) {
+                    $image_url = '[Sample](' . $image['sample']['url'] . '), ' . $image_url;
+                }
             }
 
             $data = [
                 'chat_id'             => $chat_id,
                 'reply_to_message_id' => $message_id,
-                'text'                => $image_url . '[Post](https://e621.net/post/show/' . $image->getId() . ')' .
-                                        ', Score: *' . $image->getScore() . '*, Favorites: *' . $image->getFavCount() .
-                                        '*, Rating: *' . ucfirst($this->parseRating($image->getRating())) . '*',
+                'text'                => $image_url . '[Post](https://e621.net/post/show/' . $image['id'] . ')' .
+                                        ', Score: *' . $image['score']['total'] . '*, Favorites: *' . $image['fav_count'] .
+                                        '*, Rating: *' . ucfirst($this->parseRating($image['rating'])) . '*',
                 'parse_mode'          => 'markdown',
             ];
 
@@ -115,11 +118,11 @@ class RandomCommand extends UserCommand
             TelegramLog::error($result->getDescription());
             $error = 'Telegram API error';
         } else {
-            $error = $request->getReason();
+            $error = $request['reason'];
             if (strpos($error, 'up to 6 tags') === false) {
                 TelegramLog::error($error);
 
-                $internal_error = $request->getError();
+                $internal_error = $request['error'];
                 if ($internal_error !== null) {
                     TelegramLog::error($internal_error);
                 }

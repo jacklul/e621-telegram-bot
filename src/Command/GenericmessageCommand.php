@@ -10,8 +10,8 @@
 
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\StreamHandler;
 use jacklul\e621bot\E621API;
 use Longman\TelegramBot\Commands\SystemCommand;
@@ -101,12 +101,14 @@ class GenericmessageCommand extends SystemCommand
 
         Request::sendChatAction(['chat_id' => $this->getMessage()->getChat()->getId(), 'action' => 'typing']);
 
-        $api = E621API::getApi();
-        $request = $api->postCheckMd5(['md5' => $md5]);
-        $result = $request->getResult();
+        /** @var E621API $api */
+        $api = $this->getTelegram()->getE621();
+        $request = $api->posts(['tags' => 'md5:' . $md5]);
 
-        if ($request->isSuccessful()) {
-            if (!$result->getExists()) {
+        if (isset($request['result'])) {
+            $result = $request['result']['posts'];
+
+            if (empty($result)) {
                 return Request::sendMessage(
                     [
                         'chat_id'             => $this->getMessage()->getChat()->getId(),
@@ -117,12 +119,12 @@ class GenericmessageCommand extends SystemCommand
                 );
             }
 
-            $post_id = $result->getPostId();
+            $post_id = $result[0]['id'];
         } else {
-            $error = $request->getReason();
+            $error = $request['reason'];
             TelegramLog::error($error);
 
-            $internal_error = $request->getError();
+            $internal_error = $request['error'];
             if ($internal_error !== null) {
                 TelegramLog::error($internal_error);
             }
@@ -159,10 +161,9 @@ class GenericmessageCommand extends SystemCommand
         Request::sendChatAction(['chat_id' => $this->getMessage()->getChat()->getId(), 'action' => 'typing']);
 
         try {
-            /** @noinspection PhpUndefinedMethodInspection */
             $client = new Client(
                 [
-                    'base_uri' => 'http://iqdb.harry.lu',
+                    'base_uri'  => 'https://e621.net/iqdb_queries.json',
                     'headers'  => [
                         'User-Agent' => $this->getTelegram()->getUserAgent(),
                     ],
@@ -177,7 +178,7 @@ class GenericmessageCommand extends SystemCommand
                     $data = 'http://' . $data;
                 }
 
-                $response = $client->request('GET', '/?url=' . $data);
+                $response = $client->request('GET', '?url=' . $data);
             } else {
                 if (is_array($data) && $data[0] instanceof PhotoSize) {
                     $file_id = $data[count($data) - 1]->getFileId();
@@ -205,37 +206,36 @@ class GenericmessageCommand extends SystemCommand
                     );
                 }
 
-                $response = $client->request('POST', '/', [
+                $response = $client->request('POST', '', [
                     'multipart' => [
                         [
                             'name'     => 'file',
                             'contents' => $request_data,
                             'filename' => basename($result->getResult()->getFilePath()),
                         ],
-                        [
-                            'name'     => 'service[]',
-                            'contents' => '0',
-                        ],
                     ],
                 ]);
             }
 
             $raw_result = (string)$response->getBody();
-        } catch (GuzzleException $e) {
+        } catch (Exception $e) {
             TelegramLog::error($e);
             $raw_result = $e->getMessage();
         }
 
-        if (preg_match_all("/Probable match.*?href='(.*?e621\.net.*?\/show\/\d+)/", $raw_result, $matches)) {
-            $results = count($matches[1]) > self::MAX_RESULTS ? array_slice($matches[1], 0, self::MAX_RESULTS) : $matches[1];
-        } elseif (strpos($raw_result, 'We didn\'t find any results that were highly-relevant') !== false || strpos($raw_result, 'No matches returned') !== false) {
+        $json_result = json_decode($raw_result, true);
+
+        if (is_array($json_result) && count($json_result) > 0 && isset($json_result[0]['post_id'])) {
             $results = [];
-        } elseif (strpos($raw_result, 'Not an image') !== false || strpos($raw_result, 'unsupported filetype') !== false || strpos($raw_result, 'file too large') !== false) {
-            $results = ['error' => 'This is not a valid image'];
-        } elseif (empty($raw_result)) {
-            $results = ['error' => 'Empty server reply or request timed out'];
-        } else {
-            TelegramLog::error('Unhandled result:' . PHP_EOL . '\'' . $raw_result . '\'');
+            foreach ($json_result as $result) {
+                $results[] = 'https://e621.net/posts/' . $result['post_id'];
+            }
+
+            $results = count($results) > self::MAX_RESULTS ? array_slice($results, 0, self::MAX_RESULTS) : $results;
+        }
+
+        if (strpos($raw_result, 'An unexpected error occurred.') !== false) {
+            $results = ['error' => 'Only search using a link works currently (e621.net/iqdb_queries)'];
         }
 
         if (!isset($results) || !is_array($results) || isset($results['error'])) {
@@ -243,7 +243,7 @@ class GenericmessageCommand extends SystemCommand
                 [
                     'chat_id'             => $this->getMessage()->getChat()->getId(),
                     'reply_to_message_id' => $this->getMessage()->getMessageId(),
-                    'text'                => '*Error:* ' . (isset($results) ? $results['error'] : 'Unhandled error occurred - iqdb.harry.lu might be unreachable or returned an error'),
+                    'text'                => '*Error:* ' . (isset($results) ? $results['error'] : 'Unhandled error occurred - service might be unreachable or returned an error (e621.net/iqdb_queries)'),
                     'parse_mode'          => 'markdown',
                 ]
             );

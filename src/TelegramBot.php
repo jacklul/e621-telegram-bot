@@ -25,6 +25,11 @@ class TelegramBot extends Telegram
     private $user_agent;
 
     /**
+     * @var E621API
+     */
+    private $e621;
+
+    /**
      * @param string $api_key
      * @param string $bot_username
      * @param bool   $isGae
@@ -67,7 +72,7 @@ class TelegramBot extends Telegram
             );
         }
 
-        E621API::construct($options);
+        $this->e621 = new E621API($options);
     }
 
     /**
@@ -95,6 +100,14 @@ class TelegramBot extends Telegram
     public function getUserAgent()
     {
         return $this->user_agent;
+    }
+
+    /**
+     * @return E621API
+     */
+    public function getE621()
+    {
+        return $this->e621;
     }
 
     /**

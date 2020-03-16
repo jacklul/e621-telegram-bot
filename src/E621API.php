@@ -10,56 +10,118 @@
 
 namespace jacklul\e621bot;
 
-use InvalidArgumentException;
-use jacklul\E621API\E621;
-use Longman\TelegramBot\TelegramLog;
-use RuntimeException;
+use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException as GuzzleConnectException;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 
 class E621API
 {
     /**
-     * @var E621|null
+     * @var Client
      */
-    private static $api;
+    private $client;
 
     /**
-     * @var array
+     * @param array $options
      */
-    private static $custom_options;
+    public function __construct(array $options = [])
+    {
+        $default_options = [
+            'base_uri' => 'https://e621.net',
+        ];
+
+        $this->client = new Client(array_replace_recursive($default_options, $options));
+    }
 
     /**
-     * @param array $custom_options
+     * @param array $data
      *
-     * @throws InvalidArgumentException
+     * @return array|mixed
      */
-    public static function construct(array $custom_options = [])
+    public function posts(array $data = [])
     {
-        self::$custom_options = $custom_options;
-    }
+        if (isset($data['tags'])) {
+            $tags = trim(preg_replace('!\s+!', ' ', $data['tags']));
 
-    /**
-     * @throws InvalidArgumentException
-     */
-    private static function init()
-    {
-        if (self::$api === null) {
-            self::$api = new E621(self::$custom_options);
-            self::$api->throwExceptions(false);
-            self::$api->setDebugLogHandler(static function($message) { TelegramLog::debug($message); });
+            if (substr_count($tags, ' ') + 1 > 6) {
+                return ['reason' => 'You can only search up to 6 tags.'];
+            }
+        }
+
+        try {
+            $response = $this->client->request('GET', 'posts.json', ['query' => $data]);
+            $result = json_decode((string)$response->getBody(), true);
+
+            if (!is_array($result)) {
+                $result = [
+                    'reason' => 'Data received from e621.net API is invalid',
+                    'error'  => 'Response couldn\'t be decoded into array',
+                ];
+            }
+
+            return ['result' => $result];
+        } catch (Exception $e) {
+            return $this->handleException($e);
         }
     }
 
     /**
-     * @return E621
+     * @param Exception $e
+     *
+     * @return array
      */
-    public static function getApi()
+    private function handleException(Exception $e)
     {
-        self::init();
-
-        if (self::$api === null) {
-            throw new RuntimeException('E621 instance not initialized - this shouldn\'t happen');
+        if ($e instanceof GuzzleException) {
+            return [
+                'reason' => 'HTTP Client error',
+                'error'  => $e->getMessage(),
+            ];
         }
 
-        return self::$api;
+        if ($e instanceof GuzzleConnectException) {
+            return [
+                'reason' => 'Connection to e621.net API failed or timed out',
+                'error'  => $e->getMessage(),
+            ];
+        }
+
+        if ($e instanceof RequestException) {
+            $response = $e->getResponse();
+
+            if ($response !== null) {
+                if ($response->getBody() !== null) {
+                    $result = json_decode((string)$response->getBody(), true);
+
+                    if (is_array($result)) {
+                        return ['result' => $result];
+                    }
+                }
+
+                if ($response->getStatusCode() === 403) {
+                    return [
+                        'reason' => 'Authorization required for this request',
+                        'error'  => $e->getResponse(),
+                    ];
+                }
+
+                return [
+                    'reason' => 'Connection to e621.net API failed or timed out',
+                    'error'  => 'Request resulted in a `' . $response->getStatusCode() . ' ' . $response->getReasonPhrase() . '` response',
+                ];
+            }
+
+            return [
+                'reason' => 'HTTP Request error',
+                'error'  => $e->getResponse(),
+            ];
+        }
+
+        return [
+            'reason' => 'Unknown error',
+            'error'  => $e->getMessage(),
+        ];
     }
 }

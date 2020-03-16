@@ -57,71 +57,76 @@ class InlinequeryCommand extends SystemCommand
         if ($use_pages) {
             $request_options['page'] = $offset;
         } elseif (!empty($offset)) {
-            $request_options['before_id'] = $offset;
+            $request_options['page'] = 'b' . $offset;
         }
 
-        $e621 = E621API::getApi();
-        $request = $e621->postIndex($request_options);
-        $results = $request->getResult();
+        /** @var E621API $api */
+        $api = $this->getTelegram()->getE621();
+        $request = $api->posts($request_options);
+        $results = $request['result']['posts'];
 
-        if ($request->isSuccessful()) {
+        if (isset($request['result'])) {
             $contents = [];
 
-            if (count($results) > 0) {
+            if (count($request['result']['posts']) > 0) {
                 /** @var Post $image */
-                foreach ($results as $image) {
+                foreach ($request['result']['posts'] as $image) {
+                    if (empty($image['file']['url'])) {
+                        continue;
+                    }
+
                     $element = null;
 
-                    if (in_array($image->getFileExt(), ['jpg', 'jpeg', 'png'])) {
-                        $image_url = $image->getFileUrl();
+                    if (in_array($image['file']['ext'], ['jpg', 'jpeg', 'png'])) {
+                        $image_url = $image['file']['url'];
 
-                        if ($image->getFileSize() > self::MAX_PHOTO_FILE_SIZE) {    // Telegram won't let you upload photo bigger than this so use sample image instead
-                            $image_url = $image->getSampleUrl();
+                        if ($image['file']['size'] > self::MAX_PHOTO_FILE_SIZE) {    // Telegram won't let you upload photo bigger than this so use sample image instead
+                            $image_url = $image['sample']['url'];
                         }
 
                         $contents[] = new InlineQueryResultPhoto(
                             [
                                 'type'         => 'photo',
-                                'id'           => $image->getId(),
+                                'id'           => $image['id'],
                                 'photo_url'    => $image_url,
-                                'thumb_url'    => $image->getPreviewUrl(),
-                                'photo_width'  => $image->getWidth(),
-                                'photo_height' => $image->getHeight(),
-                                'caption'      => 'https://e621.net/post/show/' . $image->getId(),
-                                'title'        => 'Post #' . $image->getId(),
-                                'description'  => '(' . $image->getFileExt() . ')',
+                                'thumb_url'    => $image['preview']['url'],
+                                'photo_width'  => $image['file']['width'],
+                                'photo_height' => $image['file']['height'],
+                                'caption'      => 'https://e621.net/post/show/' . $image['id'],
+                                'title'        => 'Post #' . $image['id'],
+                                'description'  => '(' . $image['file']['ext'] . ')',
                             ]
                         );
-                    } elseif ($image->getFileExt() === 'gif' && $image->getFileSize() <= self::MAX_PHOTO_FILE_SIZE) {   // Telegram refuses to download GIFs bigger than this, even though it shows the thumbnails in the results window
+                    } elseif ($image['file']['ext'] === 'gif' && $image['file']['size'] <= self::MAX_PHOTO_FILE_SIZE) {   // Telegram refuses to download GIFs bigger than this, even though it shows the thumbnails in the results window
                         $contents[] = new InlineQueryResultGif(
                             [
                                 'type'        => 'gif',
-                                'id'          => $image->getId(),
-                                'gif_url'     => $image->getFileUrl(),
-                                'thumb_url'   => $image->getPreviewUrl(),
-                                'gif_width'   => $image->getWidth(),
-                                'gif_height'  => $image->getHeight(),
-                                'caption'     => 'https://e621.net/post/show/' . $image->getId(),
-                                'title'       => 'Post #' . $image->getId(),
-                                'description' => '(' . $image->getFileExt() . ')',
+                                'id'          => $image['id'],
+                                'gif_url'     => $image['file']['url'],
+                                'thumb_url'   => $image['preview']['url'],
+                                'gif_width'   => $image['file']['width'],
+                                'gif_height'  => $image['file']['height'],
+                                'caption'     => 'https://e621.net/post/show/' . $image['id'],
+                                'title'       => 'Post #' . $image['id'],
+                                'description' => '(' . $image['file']['ext'] . ')',
                             ]
                         );
-                    } elseif ($image->getFileExt() === 'webm') {    // No native support for WEBM in Telegram yet, this is a bit of cheaty way that sends it as a message with web preview
+                    } elseif ($image['file']['ext'] === 'webm') {    // No native support for WEBM in Telegram yet, this is a bit of cheaty way that sends it as a message with web preview
                         $contents[] = new InlineQueryResultVideo(
                             [
                                 'type'                  => 'video',
-                                'id'                    => $image->getId(),
-                                'video_url'             => $image->getFileUrl(),
+                                'id'                    => $image['id'],
+                                'video_url'             => $image['file']['url'],
                                 'mime_type'             => 'video/mp4',
-                                'thumb_url'             => $image->getPreviewUrl(),
-                                'video_width'           => $image->getWidth(),
-                                'video_height'          => $image->getHeight(),
-                                'caption'               => 'https://e621.net/post/show/' . $image->getId(),
-                                'title'                 => 'Post #' . $image->getId(),
-                                'description'           => '(' . $image->getFileExt() . ')',
+                                'thumb_url'             => $image['preview']['url'],
+                                'video_width'           => $image['file']['width'],
+                                'video_height'          => $image['file']['height'],
+                                'caption'               => 'https://e621.net/post/show/' . $image['id'],
+                                'title'                 => 'Post #' . $image['id'],
+                                'description'           => '(' . $image['file']['ext'] . ')',
                                 'input_message_content' => new InputTextMessageContent(
                                     [
-                                        'message_text' => 'https://e621.net/post/show/' . $image->getId(),
+                                        'message_text' => 'https://e621.net/post/show/' . $image['id'],
                                     ]
                                 ),
                             ]
@@ -134,7 +139,7 @@ class InlinequeryCommand extends SystemCommand
                 if ($use_pages) {
                     $data['next_offset'] = $offset + 1;
                 } else {
-                    $data['next_offset'] = count($contents) > 0 ? end($results)->getId() : '';
+                    $data['next_offset'] = count($contents) > 0 ? end($results)['id'] : '';
                 }
             } else {
                 $data['results'] = '[]';
@@ -143,10 +148,10 @@ class InlinequeryCommand extends SystemCommand
 
             $data['cache_time'] = 300;  // Cache for 5 minutes on Telegram servers to prevent useless bot load
         } else {
-            $error = $request->getReason();
+            $error = $request['reason'];
             TelegramLog::error($error);
 
-            $internal_error = $request->getError();
+            $internal_error = $request['error'];
             if ($internal_error !== null) {
                 TelegramLog::error($internal_error);
             }
