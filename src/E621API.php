@@ -15,6 +15,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException as GuzzleConnectException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use Longman\TelegramBot\TelegramLog;
 
 class E621API
 {
@@ -91,6 +92,8 @@ class E621API
         if ($e instanceof RequestException) {
             $response = $e->getResponse();
 
+            TelegramLog::error($e->getResponse());
+
             if ($response !== null) {
                 if ($response->getBody() !== null) {
                     $result = json_decode((string)$response->getBody(), true);
@@ -100,22 +103,15 @@ class E621API
                     }
                 }
 
-                if ($response->getStatusCode() === 403) {
-                    return [
-                        'reason' => 'Authorization required for this request',
-                        'error'  => $e->getResponse(),
-                    ];
-                }
-
                 return [
-                    'reason' => 'Connection to e621.net API failed or timed out',
-                    'error'  => 'Request resulted in a `' . $response->getStatusCode() . ' ' . $response->getReasonPhrase() . '` response',
+                    'reason' => 'Connection to e621.net API failed',
+                    'error'  => $e->getMessage(),
                 ];
             }
 
             return [
                 'reason' => 'HTTP Request error',
-                'error'  => $e->getResponse(),
+                'error'  => $e->getMessage(),
             ];
         }
 
