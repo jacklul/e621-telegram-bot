@@ -87,8 +87,8 @@ class RandomCommand extends UserCommand
                 'chat_id'             => $chat_id,
                 'reply_to_message_id' => $message_id,
                 'text'                => $image_url . '[Post](https://e621.net/post/show/' . $image['id'] . ')' .
-                                        ', Score: *' . $image['score']['total'] . '*, Favorites: *' . $image['fav_count'] .
-                                        '*, Rating: *' . ucfirst($this->parseRating($image['rating'])) . '*',
+                    ', Score: *' . $image['score']['total'] . '*, Favorites: *' . $image['fav_count'] .
+                    '*, Rating: *' . ucfirst($this->parseRating($image['rating'])) . '*',
                 'parse_mode'          => 'markdown',
             ];
 
@@ -98,9 +98,9 @@ class RandomCommand extends UserCommand
                         new InlineKeyboardButton(
                             [
                                 'text'          => 'Another',
-                                'callback_data' => empty($text) ? ' ' : $text
+                                'callback_data' => empty($text) ? ' ' : $text,
                             ]
-                        )
+                        ),
                     ]
                 );
             }

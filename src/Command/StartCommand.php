@@ -16,6 +16,7 @@ use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 
 /** @noinspection PhpUndefinedClassInspection */
+
 class StartCommand extends UserCommand
 {
     /**

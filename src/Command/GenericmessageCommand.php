@@ -24,6 +24,7 @@ use Longman\TelegramBot\TelegramLog;
 use RuntimeException;
 
 /** @noinspection PhpUndefinedClassInspection */
+
 class GenericmessageCommand extends SystemCommand
 {
     const MAX_RESULTS = 5;
@@ -163,7 +164,7 @@ class GenericmessageCommand extends SystemCommand
         try {
             $client = new Client(
                 [
-                    'base_uri'  => 'https://e621.net/iqdb_queries.json',
+                    'base_uri' => 'https://e621.net/iqdb_queries.json',
                     'headers'  => [
                         'User-Agent' => $this->getTelegram()->getUserAgent(),
                     ],
@@ -206,7 +207,8 @@ class GenericmessageCommand extends SystemCommand
                     );
                 }
 
-                $response = $client->request('POST', '', [
+                $response = $client->request(
+                    'POST', '', [
                     'multipart' => [
                         [
                             'name'     => 'file',
@@ -214,7 +216,8 @@ class GenericmessageCommand extends SystemCommand
                             'filename' => basename($result->getResult()->getFilePath()),
                         ],
                     ],
-                ]);
+                ]
+                );
             }
 
             $raw_result = (string)$response->getBody();

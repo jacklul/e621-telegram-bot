@@ -67,7 +67,7 @@ class TelegramBot extends Telegram
                 $options,
                 [
                     'handler' => $stream_handler,
-                    'verify' => false,
+                    'verify'  => false,
                 ]
             );
         }
@@ -83,7 +83,7 @@ class TelegramBot extends Telegram
     {
         try {
             return parent::handle();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->notifyUser($e);
 
             if (strpos($e->getMessage(), 'Telegram returned an invalid response!') === false) {
@@ -92,22 +92,6 @@ class TelegramBot extends Telegram
         }
 
         return false;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUserAgent()
-    {
-        return $this->user_agent;
-    }
-
-    /**
-     * @return E621API
-     */
-    public function getE621()
-    {
-        return $this->e621;
     }
 
     /**
@@ -161,5 +145,21 @@ class TelegramBot extends Telegram
                 // Do nothing...
             }
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return $this->user_agent;
+    }
+
+    /**
+     * @return E621API
+     */
+    public function getE621()
+    {
+        return $this->e621;
     }
 }
