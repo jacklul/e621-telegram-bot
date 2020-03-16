@@ -226,8 +226,6 @@ class GenericmessageCommand extends SystemCommand
             $raw_result = $e->getMessage();
         }
 
-        print_r($raw_result);
-
         $json_result = json_decode($raw_result, true);
 
         if (is_array($json_result) && count($json_result) > 0 && isset($json_result[0]['post_id'])) {

@@ -10,7 +10,6 @@
 
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
-use jacklul\E621API\Entity\Post;
 use jacklul\e621bot\E621API;
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultGif;
@@ -36,7 +35,7 @@ class InlinequeryCommand extends SystemCommand
         $query = trim($this->getInlineQuery()->getQuery());
 
         $use_pages = false;
-        if (preg_match('/.*(e621|e926)\.net.*\/show\/(\d+).*/', $query, $matches)) {
+        if (preg_match('/.*(e621|e926)\.net.*\/(show|posts)\/(\d+).*/', $query, $matches)) {
             $query = 'id:' . $matches[2];
         } elseif (preg_match("/(e621|e926)\.net.*([a-f0-9]{32}).*$/", $query, $matches)) {
             $query = 'md5:' . $matches[2];
@@ -70,7 +69,6 @@ class InlinequeryCommand extends SystemCommand
             $contents = [];
 
             if (count($request['result']['posts']) > 0) {
-                /** @var Post $image */
                 foreach ($request['result']['posts'] as $image) {
                     if (empty($image['file']['url'])) {
                         continue;
