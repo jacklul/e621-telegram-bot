@@ -55,7 +55,7 @@ class E621API
             $result = json_decode((string)$response->getBody(), true);
 
             if (!is_array($result)) {
-                $result = [
+                return [
                     'reason' => 'Data received from e621.net API is invalid',
                     'error'  => 'Response couldn\'t be decoded into array',
                 ];
