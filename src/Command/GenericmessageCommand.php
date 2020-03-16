@@ -237,8 +237,8 @@ class GenericmessageCommand extends SystemCommand
             $results = count($results) > self::MAX_RESULTS ? array_slice($results, 0, self::MAX_RESULTS) : $results;
         }
 
-        if (strpos($raw_result, 'An unexpected error occurred') !== false) {
-            $results = ['error' => 'Only search using a link works currently'];
+        if (!is_string($data) && strpos($raw_result, 'An unexpected error occurred') !== false) {
+            $results = ['error' => 'Only search using a direct image link works currently'];
         }
 
         if (!isset($results) || !is_array($results) || isset($results['error'])) {
