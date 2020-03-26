@@ -214,15 +214,16 @@ class GenericmessageCommand extends SystemCommand
                 }
 
                 $response = $client->request(
-                    'POST', '', [
-                    'multipart' => [
-                        [
-                            'name'     => 'file',
-                            'contents' => $request_data,
-                            'filename' => basename($result->getResult()->getFilePath()),
+                    'POST', '',
+                    [
+                        'multipart' => [
+                            [
+                                'name'     => 'file',
+                                'contents' => $request_data,
+                                'filename' => basename($result->getResult()->getFilePath()),
+                            ],
                         ],
-                    ],
-                ]
+                    ]
                 );
             }
 

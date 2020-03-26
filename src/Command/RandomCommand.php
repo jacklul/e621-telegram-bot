@@ -10,7 +10,6 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use jacklul\E621API\Entity\Post;
 use jacklul\e621bot\E621API;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
@@ -71,7 +70,6 @@ class RandomCommand extends UserCommand
                 );
             }
 
-            /** @var Post $image */
             $image = $request['result']['posts'][0];
 
             $image_url = '';
