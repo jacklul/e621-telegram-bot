@@ -12,6 +12,8 @@ env_variables:
   BOT_WEBHOOK: 'https://YOURAPPNAME.appspot.com/?a=run&s=RandomUnguessableString'
   BOT_SECRET: 'RandomUnguessableString'
   #BOT_ADMIN: '1563465'
+  #E621_LOGIN: ''
+  #E621_API_KEY: ''
 
 skip_files:
 - ^.*\.yaml$

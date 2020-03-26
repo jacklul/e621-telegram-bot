@@ -162,17 +162,23 @@ class GenericmessageCommand extends SystemCommand
         Request::sendChatAction(['chat_id' => $this->getMessage()->getChat()->getId(), 'action' => 'typing']);
 
         try {
-            $client = new Client(
-                [
-                    'base_uri' => 'https://e621.net/iqdb_queries.json',
-                    'headers'  => [
-                        'User-Agent' => $this->getTelegram()->getUserAgent(),
-                    ],
-                    'timeout'  => 30,
-                    'handler'  => new StreamHandler(),
-                    'verify'   => false,
-                ]
-            );
+            $options = [
+                'base_uri' => 'https://e621.net/iqdb_queries.json',
+                'headers'  => [
+                    'User-Agent' => $this->getTelegram()->getUserAgent(),
+                ],
+                'timeout'  => 30,
+                'handler'  => new StreamHandler(),
+                'verify'   => false,
+            ];
+
+            $auth = [getenv('E621_LOGIN'), getenv('E621_API_KEY')];
+
+            if (!empty($auth[0]) && !empty($auth[1])) {
+                $options['auth'] = $auth;
+            }
+
+            $client = new Client($options);
 
             if (is_string($data)) {
                 if (($parts = parse_url($data)) && !isset($parts['scheme'])) {
@@ -221,32 +227,26 @@ class GenericmessageCommand extends SystemCommand
             }
 
             $raw_result = (string)$response->getBody();
+            $json_result = json_decode($raw_result, true);
+
+            if (is_array($json_result) && count($json_result) > 0 && isset($json_result[0]['post_id'])) {
+                $results = [];
+                foreach ($json_result as $result) {
+                    $results[] = 'https://e621.net/posts/' . $result['post_id'];
+                }
+
+                $results = count($results) > self::MAX_RESULTS ? array_slice($results, 0, self::MAX_RESULTS) : $results;
+            }
         } catch (Exception $e) {
             TelegramLog::error($e);
-            $raw_result = $e->getMessage();
         }
 
-        $json_result = json_decode($raw_result, true);
-
-        if (is_array($json_result) && count($json_result) > 0 && isset($json_result[0]['post_id'])) {
-            $results = [];
-            foreach ($json_result as $result) {
-                $results[] = 'https://e621.net/posts/' . $result['post_id'];
-            }
-
-            $results = count($results) > self::MAX_RESULTS ? array_slice($results, 0, self::MAX_RESULTS) : $results;
-        }
-
-        if (!is_string($data) && strpos($raw_result, 'An unexpected error occurred') !== false) {
-            $results = ['error' => 'Only search using a direct image link works currently'];
-        }
-
-        if (!isset($results) || !is_array($results) || isset($results['error'])) {
+        if (!isset($results) || isset($json_result['message'])) {
             return Request::sendMessage(
                 [
                     'chat_id'             => $this->getMessage()->getChat()->getId(),
                     'reply_to_message_id' => $this->getMessage()->getMessageId(),
-                    'text'                => '*Error:* ' . (isset($results) ? $results['error'] : 'Unhandled error occurred - service might be unreachable or returned an error'),
+                    'text'                => '*Error:* ' . (isset($json_result, $json_result['message']) ? $json_result['message'] . ' (e621.net)' : 'Unhandled error occurred - service might be unreachable or returned an error'),
                     'parse_mode'          => 'markdown',
                 ]
             );
@@ -257,9 +257,9 @@ class GenericmessageCommand extends SystemCommand
 
         if (count($results) > 0) {
             if (count($results) === 1) {
-                $text = '*Probable match:* ';
+                $text = '*Post:* ';
             } else {
-                $text = '*Probable matches:*' . PHP_EOL;
+                $text = '*Posts:*' . PHP_EOL;
             }
 
             $matches = [];
