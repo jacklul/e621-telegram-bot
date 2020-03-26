@@ -257,7 +257,7 @@ class GenericmessageCommand extends SystemCommand
 
         if (count($results) > 0) {
             if (count($results) === 1) {
-                $text = '*Post:* ';
+                $text = '*Post:*';
             } else {
                 $text = '*Posts:*' . PHP_EOL;
             }
