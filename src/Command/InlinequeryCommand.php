@@ -36,7 +36,7 @@ class InlinequeryCommand extends SystemCommand
 
         $use_pages = false;
         if (preg_match('/.*(e621|e926)\.net.*\/(show|posts)\/(\d+).*/', $query, $matches)) {
-            $query = 'id:' . $matches[2];
+            $query = 'id:' . $matches[3];
         } elseif (preg_match("/(e621|e926)\.net.*([a-f0-9]{32}).*$/", $query, $matches)) {
             $query = 'md5:' . $matches[2];
         } else {
