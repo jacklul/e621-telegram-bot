@@ -33,6 +33,12 @@ class E621API
             'base_uri' => 'https://e621.net',
         ];
 
+        $auth = [getenv('E621_LOGIN'), getenv('E621_API_KEY')];
+
+        if (!empty($auth[0]) && !empty($auth[1])) {
+            $default_options['auth'] = $auth;
+        }
+
         $this->client = new Client(array_replace_recursive($default_options, $options));
     }
 
