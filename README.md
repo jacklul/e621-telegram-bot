@@ -6,7 +6,7 @@ Simple Telegram bot that serves images from [e621.net](https://e621.net) image b
 - /random command
 - Inline search (`@username tags` in any chat), supports e621 links
 - MD5 lookup
-- Reverse search ([iqdb.harry.lu](http://iqdb.harry.lu))
+- Reverse search ([e621.net/iqdb_queries](https://e621.net/iqdb_queries))
 
 Do whatever you want with this, as long as you keep me credited.
 
