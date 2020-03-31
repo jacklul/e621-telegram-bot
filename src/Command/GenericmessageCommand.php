@@ -27,7 +27,8 @@ use RuntimeException;
 
 class GenericmessageCommand extends SystemCommand
 {
-    const MAX_RESULTS = 5;
+    const MAX_REVERSE_SEARCH_RESULTS = 5;
+    const MAX_DOCUMENT_SIZE = 5242880;
 
     /**
      * @return ServerResponse
@@ -190,9 +191,31 @@ class GenericmessageCommand extends SystemCommand
                 if (is_array($data) && $data[0] instanceof PhotoSize) {
                     $file_id = $data[count($data) - 1]->getFileId();
                 } elseif ($data instanceof Document) {
+                    if (strpos($data->getMimeType(), 'image/') === false) {
+                        return Request::sendMessage(
+                            [
+                                'chat_id'             => $this->getMessage()->getChat()->getId(),
+                                'reply_to_message_id' => $this->getMessage()->getMessageId(),
+                                'text'                => '*Error:* File is not an image',
+                                'parse_mode'          => 'markdown',
+                            ]
+                        );
+                    }
+
+                    if ($data->getFileSize() > self::MAX_DOCUMENT_SIZE) {
+                        return Request::sendMessage(
+                            [
+                                'chat_id'             => $this->getMessage()->getChat()->getId(),
+                                'reply_to_message_id' => $this->getMessage()->getMessageId(),
+                                'text'                => '*Error:* File exceeds 5MB file size limit',
+                                'parse_mode'          => 'markdown',
+                            ]
+                        );
+                    }
+
                     $file_id = $data->getFileId();
                 } else {
-                    throw new RuntimeException('No file provided');
+                    throw new RuntimeException('No file provided - this shouldn\'t happen!');
                 }
 
                 $result = Request::getFile(['file_id' => $file_id]);
@@ -236,7 +259,7 @@ class GenericmessageCommand extends SystemCommand
                     $results[] = 'https://e621.net/posts/' . $result['post_id'];
                 }
 
-                $results = count($results) > self::MAX_RESULTS ? array_slice($results, 0, self::MAX_RESULTS) : $results;
+                $results = count($results) > self::MAX_REVERSE_SEARCH_RESULTS ? array_slice($results, 0, self::MAX_REVERSE_SEARCH_RESULTS) : $results;
             }
         } catch (Exception $e) {
             TelegramLog::error($e);
