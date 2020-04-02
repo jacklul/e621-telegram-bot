@@ -38,7 +38,7 @@ class GenericmessageCommand extends SystemCommand
     {
         $message = $this->getMessage();
 
-        if ($message->getGroupChatCreated() || $message->getSupergroupChatCreated()) {
+        if ($message->getGroupChatCreated()) {
             return $this->getTelegram()->executeCommand('start');
         }
 
