@@ -253,13 +253,19 @@ class GenericmessageCommand extends SystemCommand
             $raw_result = (string)$response->getBody();
             $json_result = json_decode($raw_result, true);
 
-            if (is_array($json_result) && count($json_result) > 0 && isset($json_result[0]['post_id'])) {
-                $results = [];
-                foreach ($json_result as $result) {
-                    $results[] = 'https://e621.net/posts/' . $result['post_id'];
+            if (is_array($json_result)) {
+                if (isset($json_result['posts'])) {
+                    $json_result = $json_result['posts'];
                 }
 
-                $results = count($results) > self::MAX_REVERSE_SEARCH_RESULTS ? array_slice($results, 0, self::MAX_REVERSE_SEARCH_RESULTS) : $results;
+                $results = [];
+                if (count($json_result) > 0 && isset($json_result[0]['post_id'])) {
+                    foreach ($json_result as $result) {
+                        $results[] = 'https://e621.net/posts/' . $result['post_id'];
+                    }
+
+                    $results = count($results) > self::MAX_REVERSE_SEARCH_RESULTS ? array_slice($results, 0, self::MAX_REVERSE_SEARCH_RESULTS) : $results;
+                }
             }
         } catch (Exception $e) {
             TelegramLog::error($e);
