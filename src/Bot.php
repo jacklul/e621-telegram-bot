@@ -119,7 +119,7 @@ class Bot
     {
         if (PHP_SAPI !== 'cli') {
             $secret = getenv('BOT_SECRET');
-            $secret_get = isset($_GET['s']) ? $_GET['s'] : '';
+            $secret_get = $_GET['s'] ?: '';
 
             if (!isset($secret, $secret_get) || $secret !== $secret_get) {
                 return false;
