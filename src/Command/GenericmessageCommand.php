@@ -54,9 +54,9 @@ class GenericmessageCommand extends SystemCommand
             }
         }
 
-        $messageContainsBotUsername = strpos($message->getText(true), $bot_username) !== false || strpos($message->getCaption(), $bot_username) !== false;
+        $messageContainsBotUsername = strpos($message->getText(true), '@' . $bot_username) !== false || strpos($message->getCaption(), '@' . $bot_username) !== false;
 
-        if ($messageContainsBotUsername || $message->getReplyToMessage() || $message->getChat()->isPrivateChat()) {
+        if ($messageContainsBotUsername || ($messageContainsBotUsername && $message->getReplyToMessage()) || $message->getChat()->isPrivateChat()) {
             $message->getReplyToMessage() && $message = $message->getReplyToMessage();
             $text = $message->getText(true);
             $text = trim(str_replace('@' . $bot_username, '', $text));
