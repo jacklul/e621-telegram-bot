@@ -39,7 +39,6 @@ class GenericmessageCommand extends SystemCommand
     {
         $message = $this->getMessage();
         $bot_id = $this->getTelegram()->getBotId();
-        $bot_username = $this->getTelegram()->getBotUsername();
 
         if ($message->getGroupChatCreated()) {
             return $this->getTelegram()->executeCommand('help');
