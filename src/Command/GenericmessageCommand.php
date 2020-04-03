@@ -18,6 +18,7 @@ use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\Document;
 use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Entities\ServerResponse;
+use Longman\TelegramBot\Entities\User;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
@@ -37,13 +38,28 @@ class GenericmessageCommand extends SystemCommand
     public function execute()
     {
         $message = $this->getMessage();
+        $bot_id = $this->getTelegram()->getBotId();
+        $bot_username = $this->getTelegram()->getBotUsername();
 
         if ($message->getGroupChatCreated()) {
-            return $this->getTelegram()->executeCommand('start');
+            return $this->getTelegram()->executeCommand('help');
         }
 
-        if ($message->getChat()->isPrivateChat()) {
+        if ($new_chat_members = $message->getNewChatMembers()) {
+            /** @var User $user */
+            foreach ($new_chat_members as $user) {
+                if ($user->getId() === (int)$bot_id) {
+                    return $this->getTelegram()->executeCommand('help');
+                }
+            }
+        }
+
+        $messageContainsBotUsername = strpos($message->getText(true), $bot_username) !== false || strpos($message->getCaption(), $bot_username) !== false;
+
+        if ($messageContainsBotUsername || $message->getReplyToMessage() || $message->getChat()->isPrivateChat()) {
+            $message->getReplyToMessage() && $message = $message->getReplyToMessage();
             $text = $message->getText(true);
+            $text = trim(str_replace('@' . $bot_username, '', $text));
 
             if ($this->isUrl($text)) {
                 if (preg_match("/e621\.net/", $text) || preg_match('/e926\\.net/', $text)) {

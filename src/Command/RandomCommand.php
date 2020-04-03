@@ -28,15 +28,19 @@ class RandomCommand extends UserCommand
     public function execute()
     {
         $callback_query = $this->getCallbackQuery();
+        $message = $this->getMessage();
 
         if ($callback_query) {
             $chat_id = $callback_query->getMessage()->getChat()->getId();
             $message_id = $callback_query->getMessage()->getMessageId();
             $text = $this->getCallbackQuery()->getData();
         } else {
-            $chat_id = $this->getMessage()->getChat()->getId();
-            $message_id = $this->getMessage()->getMessageId();
-            $text = $this->getMessage()->getText(true);
+            $message->getReplyToMessage() && $message = $message->getReplyToMessage();
+
+            $chat_id = $message->getChat()->getId();
+            $message_id = $message->getMessageId();
+            $text = $message->getText(true);
+            $text = trim(str_replace('@' . $this->getTelegram()->getBotUsername(), '', $text));
         }
 
         Request::sendChatAction(['chat_id' => $chat_id, 'action' => 'typing']);
