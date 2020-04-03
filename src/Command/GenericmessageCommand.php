@@ -54,7 +54,7 @@ class GenericmessageCommand extends SystemCommand
         }
 
         if ($message->getChat()->isPrivateChat()) {
-            $text = $message->getText(true);
+            $text = trim($message->getText(true));
 
             if ($this->isUrl($text)) {
                 if (preg_match("/e621\.net/", $text) || preg_match('/e926\\.net/', $text)) {
@@ -68,7 +68,7 @@ class GenericmessageCommand extends SystemCommand
                 return $this->reverseSearch($object);     // message contains photo/document and has no e621 url in caption (results posted from inline search)
             }
 
-            if (!$this->isUrl($text) && !$this->isUrl($message->getCaption())) {
+            if ($text !== '') {
                 return $this->getTelegram()->executeCommand('random');  // message is just text, try to make /random search
             }
         }
