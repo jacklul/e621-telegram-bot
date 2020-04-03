@@ -11,8 +11,6 @@
 namespace jacklul\e621bot;
 
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\StreamHandler;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\Telegram;
@@ -32,11 +30,10 @@ class TelegramBot extends Telegram
     /**
      * @param string $api_key
      * @param string $bot_username
-     * @param bool   $isGae
      *
      * @throws TelegramException
      */
-    public function __construct($api_key, $bot_username = '', $isGae = false)
+    public function __construct($api_key, $bot_username = '')
     {
         parent::__construct($api_key, $bot_username);
 
@@ -47,30 +44,6 @@ class TelegramBot extends Telegram
                 'User-Agent' => $this->user_agent,
             ],
         ];
-
-        if ($isGae) {
-            // GAE does not have curl, use stream handler instead
-            $stream_handler = new StreamHandler();
-
-            Request::setClient(
-                new Client(
-                    [
-                        'base_uri' => 'https://api.telegram.org',
-                        'handler'  => $stream_handler,
-                        'verify'   => false,
-                        'timeout'  => 15,
-                    ]
-                )
-            );
-
-            $options = array_merge_recursive(
-                $options,
-                [
-                    'handler' => $stream_handler,
-                    'verify'  => false,
-                ]
-            );
-        }
 
         $this->e621 = new E621API($options);
     }

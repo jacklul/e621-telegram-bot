@@ -16,7 +16,6 @@ use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
 use Monolog\Handler\ErrorLogHandler;
-use Monolog\Handler\SyslogHandler;
 use Monolog\Logger;
 use RuntimeException;
 use Throwable;
@@ -94,7 +93,7 @@ class Bot
     {
         $bot_username = getenv('BOT_USERNAME');
 
-        $this->telegram = new TelegramBot(getenv('BOT_API_KEY'), $bot_username, $this->isGae());
+        $this->telegram = new TelegramBot(getenv('BOT_API_KEY'), $bot_username);
 
         $logger = new Logger($bot_username);
         $level = Logger::ERROR;
@@ -103,12 +102,7 @@ class Bot
             $level = Logger::DEBUG;
         }
 
-        if ($this->isGae()) {
-            $logger->pushHandler(new SyslogHandler($bot_username, LOG_USER, $level));   // Log to syslog
-        } else {
-            $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));   // Log to PHP error_log
-        }
-
+        $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));   // Log to PHP error_log
         TelegramLog::initialize($logger);
 
         $this->telegram->addCommandsPath(ROOT_PATH . '/src/Command/');
@@ -116,14 +110,6 @@ class Bot
         if (!empty(getenv('BOT_ADMIN'))) {
             $this->telegram->enableAdmin((int)getenv('BOT_ADMIN'));
         }
-    }
-
-    /**
-     * @return bool
-     */
-    private function isGae()
-    {
-        return isset($_SERVER['CURRENT_VERSION_ID']) || isset($_SERVER['GAE_VERSION']);
     }
 
     /**
