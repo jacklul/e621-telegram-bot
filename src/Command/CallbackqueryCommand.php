@@ -25,7 +25,13 @@ class CallbackqueryCommand extends SystemCommand
      */
     public function execute()
     {
-        if ($this->getCallbackQuery()->getData() !== '' && ($this->getCallbackQuery()->getMessage() !== null && strpos($this->getCallbackQuery()->getMessage()->getText(), ', Post') !== false)) {
+        if (
+            $this->getCallbackQuery()->getData() !== '' &&
+            (
+                $this->getCallbackQuery()->getMessage() !== null &&
+                strpos($this->getCallbackQuery()->getMessage()->getText(), 'Post') !== false
+            )
+        ) {
             return $this->getTelegram()->executeCommand('random');
         }
 
