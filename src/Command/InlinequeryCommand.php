@@ -20,8 +20,6 @@ use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
 
-/** @noinspection PhpUndefinedClassInspection */
-
 class InlinequeryCommand extends SystemCommand
 {
     const MAX_PHOTO_FILE_SIZE = 5242880;   //  5 MB

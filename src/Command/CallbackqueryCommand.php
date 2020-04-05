@@ -15,8 +15,6 @@ use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 
-/** @noinspection PhpUndefinedClassInspection */
-
 class CallbackqueryCommand extends SystemCommand
 {
     /**

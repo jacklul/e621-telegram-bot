@@ -24,8 +24,6 @@ use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
 use RuntimeException;
 
-/** @noinspection PhpUndefinedClassInspection */
-
 class GenericmessageCommand extends SystemCommand
 {
     const MAX_REVERSE_SEARCH_RESULTS = 5;
