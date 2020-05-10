@@ -197,7 +197,7 @@ class TelegramBot extends Telegram
             $result = $chat_data->getResult();
             $group_description = $result->getDescription();
 
-            preg_match('/.*@' . $this->getBotUsername() .'\[(.*)\].*/', $group_description, $matches);
+            preg_match('/.*@' . $this->getBotUsername() . '\[(.*)\].*/', $group_description, $matches);
 
             if (isset($matches[1])) {
                 try {

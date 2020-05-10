@@ -254,6 +254,7 @@ class Bot
             print 'Failed to set bot commands: ' . $result->getDescription() . PHP_EOL;
         }
     }
+
     /**
      * Clear MyCommands
      */
@@ -261,7 +262,7 @@ class Bot
     {
         $result = Request::setMyCommands(
             [
-                'commands' => [ ],
+                'commands' => [],
             ]
         );
 
