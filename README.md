@@ -11,11 +11,11 @@ Simple Telegram bot that serves images from [e621.net](https://e621.net) image b
 
 Do whatever you want with this, as long as you keep me credited.
 
-#### Group settings
+### Group settings
 
 To set settings you have to paste specific string into your group's description and modify configuration variables:
 
-`@e621searchbot[{"tags":"felid hugging score:>=50","force":0,"antispam":15,"sfw":0}]`
+`@username[{"tags":"felid hugging score:>=50","force":0,"antispam":15,"sfw":0}]`
 
 - `tags` - sets the default tags to use when none provided
 - `force` - forces default tags and ignores user input
