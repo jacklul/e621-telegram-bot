@@ -8,9 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\SystemCommands;
+namespace jacklul\e621bot\Commands\SystemCommands;
 
-use Longman\TelegramBot\Commands\SystemCommand;
+use jacklul\e621bot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;

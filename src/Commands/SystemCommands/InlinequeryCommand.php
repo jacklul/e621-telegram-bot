@@ -8,10 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\SystemCommands;
+namespace jacklul\e621bot\Commands\SystemCommands;
 
-use jacklul\e621bot\E621API;
-use Longman\TelegramBot\Commands\SystemCommand;
+use jacklul\e621bot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultGif;
 use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultPhoto;
 use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultVideo;
@@ -58,9 +57,7 @@ class InlinequeryCommand extends SystemCommand
             $request_options['page'] = 'b' . $offset;
         }
 
-        /** @var E621API $api */
-        $api = $this->getTelegram()->getE621();
-        $request = $api->posts($request_options);
+        $request = $this->getTelegram()->getE621()->posts($request_options);
         $results = $request['result']['posts'];
 
         if (isset($request['result'])) {

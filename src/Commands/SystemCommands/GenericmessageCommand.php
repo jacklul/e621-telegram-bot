@@ -8,17 +8,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\SystemCommands;
+namespace jacklul\e621bot\Commands\SystemCommands;
 
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\StreamHandler;
-use jacklul\e621bot\E621API;
-use Longman\TelegramBot\Commands\SystemCommand;
+use jacklul\e621bot\Commands\SystemCommand;
 use Longman\TelegramBot\Entities\Document;
 use Longman\TelegramBot\Entities\PhotoSize;
 use Longman\TelegramBot\Entities\ServerResponse;
-use Longman\TelegramBot\Entities\User;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
@@ -43,7 +41,6 @@ class GenericmessageCommand extends SystemCommand
         }
 
         if ($new_chat_members = $message->getNewChatMembers()) {
-            /** @var User $user */
             foreach ($new_chat_members as $user) {
                 if ($user->getId() === (int)$bot_id) {
                     return $this->getTelegram()->executeCommand('help');
@@ -112,9 +109,7 @@ class GenericmessageCommand extends SystemCommand
 
         Request::sendChatAction(['chat_id' => $this->getMessage()->getChat()->getId(), 'action' => 'typing']);
 
-        /** @var E621API $api */
-        $api = $this->getTelegram()->getE621();
-        $request = $api->posts(['tags' => 'md5:' . $md5]);
+        $request = $this->getTelegram()->getE621()->posts(['tags' => 'md5:' . $md5]);
 
         if (isset($request['result'])) {
             $result = $request['result']['posts'];
@@ -285,7 +280,7 @@ class GenericmessageCommand extends SystemCommand
                 [
                     'chat_id'             => $this->getMessage()->getChat()->getId(),
                     'reply_to_message_id' => $this->getMessage()->getMessageId(),
-                    'text'                => '*Error:* ' . (isset($json_result, $json_result['message']) ? $json_result['message'] . ' (e621.net)' : 'Unhandled error occurred - service might be unreachable or returned an error'),
+                    'text'                => '*Error:* ' . (isset($json_result['message']) ? $json_result['message'] . ' (e621.net)' : 'Unhandled error occurred - service might be unreachable or returned an error'),
                     'parse_mode'          => 'markdown',
                 ]
             );

@@ -8,10 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Longman\TelegramBot\Commands\UserCommands;
+namespace jacklul\e621bot\Commands\UserCommands;
 
-use jacklul\e621bot\E621API;
-use Longman\TelegramBot\Commands\UserCommand;
+use jacklul\e621bot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
 use Longman\TelegramBot\Entities\InlineKeyboardButton;
 use Longman\TelegramBot\Entities\ServerResponse;
@@ -31,14 +30,87 @@ class RandomCommand extends UserCommand
         $message = $this->getMessage();
 
         if ($callback_query) {
-            $chat_id = $callback_query->getMessage()->getChat()->getId();
-            $message_id = $callback_query->getMessage()->getMessageId();
+            $message = $callback_query->getMessage();
+
             $text = $this->getCallbackQuery()->getData();
         } else {
-            $chat_id = $message->getChat()->getId();
-            $message_id = $message->getMessageId();
             $text = $message->getText(true);
         }
+
+        $chat_id = $message->getChat()->getId();
+        $message_id = $message->getMessageId();
+
+        if (!$message->getChat()->isPrivateChat()) {
+            $settings = $this->getTelegram()->getGroupSettings($chat_id);
+
+            if ($settings === false) {
+                if ($callback_query) {
+                    return Request::answerCallbackQuery(
+                        [
+                            'callback_query_id' => $callback_query->getId(),
+                        ]
+                    );
+                }
+
+                return Request::emptyResponse();
+            }
+
+            $antispam = 0;
+            if (isset($settings['antispam']) && (int)$settings['antispam'] > 0) {
+                $antispam = (int)$settings['antispam'];
+            }
+
+            if ($antispam > 0) {
+                $memcache = $this->getTelegram()->getMemcache();
+
+                if (($antispam_remaining = $memcache->get('antispam:' . $this->getName() . ':' . $chat_id)) !== false) {
+                    $antispam_text = 'Please wait ' . ($antispam - (time() - $antispam_remaining)) . ' seconds before next search.';
+
+                    if ($antispam_remaining > 0) {
+                        if ($callback_query) {
+                            return Request::answerCallbackQuery(
+                                [
+                                    'callback_query_id' => $callback_query->getId(),
+                                    'text'              => $antispam_text,
+                                    'show_alert'        => true,
+                                ]
+                            );
+                        }
+
+                        $data = [
+                            'chat_id'             => $chat_id,
+                            'reply_to_message_id' => $message_id,
+                            'text'                => $antispam_text,
+                            'parse_mode'          => 'markdown',
+                        ];
+
+                        return Request::sendMessage($data);
+                    }
+                }
+
+                $memcache->set('antispam:' . $this->getName() . ':' . $chat_id, time(), null, $antispam);
+            }
+
+            if (
+                (
+                    empty($text) ||
+                    (isset($settings['force']) && (int)$settings['force'] === 1)
+                ) &&
+                isset($settings['tags'])
+            ) {
+                $text = $settings['tags'];
+            }
+
+            if (isset($settings['sfw']) && (int)$settings['sfw'] === 1) {
+                if (strpos($text, 'rating:') !== false) {
+                    $text = preg_replace('/rating:\w+/', '', $text);
+                }
+
+                $text .= ' rating:safe';
+            }
+        }
+
+        echo PHP_EOL . $text . PHP_EOL;
 
         Request::sendChatAction(['chat_id' => $chat_id, 'action' => 'typing']);
 
@@ -48,9 +120,7 @@ class RandomCommand extends UserCommand
             ];
         }
 
-        /** @var E621API $api */
-        $api = $this->getTelegram()->getE621();
-        $request = $api->posts(['tags' => 'order:random ' . $text, 'limit' => 1]);
+        $request = $this->getTelegram()->getE621()->posts(['tags' => 'order:random ' . $text, 'limit' => 1]);
 
         if (isset($request['result'])) {
             if (count($request['result']['posts']) === 0) {

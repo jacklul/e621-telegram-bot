@@ -14,7 +14,7 @@
   "require": {
     "php": ">=5.5.9",
     "guzzlehttp/guzzle": "^6.3",
-    "longman/telegram-bot": "^0.61.0",
+    "longman/telegram-bot": "^0.62.0",
     "monolog/monolog": "^1.0"
   },
   "require-dev": {

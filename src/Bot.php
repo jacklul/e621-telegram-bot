@@ -12,13 +12,13 @@ namespace jacklul\e621bot;
 
 use Dotenv\Dotenv;
 use Exception;
+use Longman\TelegramBot\Entities\BotCommand;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\TelegramLog;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use RuntimeException;
-use Throwable;
 
 class Bot
 {
@@ -37,6 +37,7 @@ class Bot
         }
 
         ini_set('display_errors', false);
+        ini_set('log_errors', true);
 
         if (class_exists(Dotenv::class) && file_exists(ROOT_PATH . '/.env')) {
             $env = Dotenv::create(ROOT_PATH);
@@ -46,7 +47,6 @@ class Bot
 
     /**
      * @throws Exception
-     * @throws Throwable
      */
     public function run()
     {
@@ -80,6 +80,12 @@ class Bot
             case 'info':
                 $this->webhookInfo();
                 break;
+            case 'setcommands':
+                $this->setCommands();
+                break;
+            case 'clearcommands':
+                $this->clearCommands();
+                break;
             default:
                 print 'Invalid command' . PHP_EOL;
                 print ' Commands: run, set, unset, info' . PHP_EOL;
@@ -105,7 +111,7 @@ class Bot
         $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $level));   // Log to PHP error_log
         TelegramLog::initialize($logger);
 
-        $this->telegram->addCommandsPath(ROOT_PATH . '/src/Command/');
+        $this->telegram->addCommandsPath(ROOT_PATH . '/src/Commands/');
 
         if (!empty(getenv('BOT_ADMIN'))) {
             $this->telegram->enableAdmin((int)getenv('BOT_ADMIN'));
@@ -209,6 +215,60 @@ class Bot
             }
         } else {
             print $result->getDescription() . PHP_EOL;
+        }
+    }
+
+    /**
+     * Set MyCommands
+     */
+    private function setCommands()
+    {
+        $result = Request::setMyCommands(
+            [
+                'commands' => [
+                    new BotCommand(
+                        [
+                            'command'     => 'random',
+                            'description' => 'Send random image',
+                        ]
+                    ),
+                    new BotCommand(
+                        [
+                            'command'     => 'help',
+                            'description' => 'Show help',
+                        ]
+                    ),
+                    new BotCommand(
+                        [
+                            'command'     => 'settings',
+                            'description' => 'Show settings',
+                        ]
+                    ),
+                ],
+            ]
+        );
+
+        if ($result->isOk()) {
+            print 'Bot commands were set!' . PHP_EOL;
+        } else {
+            print 'Failed to set bot commands: ' . $result->getDescription() . PHP_EOL;
+        }
+    }
+    /**
+     * Clear MyCommands
+     */
+    private function clearCommands()
+    {
+        $result = Request::setMyCommands(
+            [
+                'commands' => [ ],
+            ]
+        );
+
+        if ($result->isOk()) {
+            print 'Bot commands were cleared!' . PHP_EOL;
+        } else {
+            print 'Failed to clear bot commands: ' . $result->getDescription() . PHP_EOL;
         }
     }
 }
