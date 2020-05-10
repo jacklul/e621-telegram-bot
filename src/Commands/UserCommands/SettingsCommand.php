@@ -53,8 +53,6 @@ class SettingsCommand extends UserCommand
             $group_settings
         );
 
-        $group_settings = [];
-
         if ($group_settings === false) {
             $text[] = '*Failed to fetch group description!*';
         } else if ($group_settings === null || empty($group_settings)) {
