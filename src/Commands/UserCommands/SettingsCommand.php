@@ -53,10 +53,13 @@ class SettingsCommand extends UserCommand
             $group_settings
         );
 
+        $group_settings = [];
+
         if ($group_settings === false) {
             $text[] = '*Failed to fetch group description!*';
-        } else if ($group_settings === null) {
-            $text[] = '*Settings string is invalid!*';
+        } else if ($group_settings === null || empty($group_settings)) {
+            $text[] = '*Settings string is invalid or empty!*' . PHP_EOL;
+            $text[] = 'Use this as a template:' . PHP_EOL .'`@' . $this->getTelegram()->getBotUsername() . '[{"tags":"score:>=25","force":0,"antispam":10,"sfw":0}]`';
         } else if (is_array($group_settings)) {
             $text[] = '*Default tags*: ' . (!empty($settings['tags']) ? $settings['tags'] : '(not set)');
             $text[] = '*Forced tags*: ' . ((int)$settings['force'] === 1 ? 'enabled' : 'disabled');
