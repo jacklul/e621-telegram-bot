@@ -88,7 +88,7 @@ class Bot
                 break;
             default:
                 print 'Invalid command' . PHP_EOL;
-                print ' Commands: run, set, unset, info' . PHP_EOL;
+                print ' Commands: run, set, unset, info, setcommands, clearcommands' . PHP_EOL;
         }
     }
 
