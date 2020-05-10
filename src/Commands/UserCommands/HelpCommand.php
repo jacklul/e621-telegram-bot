@@ -32,7 +32,7 @@ class HelpCommand extends UserCommand
             $text[] = PHP_EOL . '*Reverse image search*:' . PHP_EOL . ' Send any direct image link or photo message';
         } else {
             $text[] = PHP_EOL . '*Random image*:' . PHP_EOL . ' Use  `/random <tags>`  command';
-            $text[] = PHP_EOL . '*Manage settings*:' . PHP_EOL . ' As group administrator use  `/settings`  command';
+            $text[] = PHP_EOL . '*Show settings*:' . PHP_EOL . ' Use  `/settings`  command';
             $text[] = PHP_EOL . '*Private chat exclusive features were hidden, execute this command in private chat to see them.*';
         }
 
