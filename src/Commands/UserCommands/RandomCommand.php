@@ -80,7 +80,7 @@ class RandomCommand extends UserCommand
                         $data = [
                             'chat_id'             => $chat_id,
                             'reply_to_message_id' => $message_id,
-                            'text'                => $antispam_text,
+                            'text'                => '*' . $antispam_text . '*',
                             'parse_mode'          => 'markdown',
                         ];
 
