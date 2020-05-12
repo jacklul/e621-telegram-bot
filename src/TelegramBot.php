@@ -199,19 +199,18 @@ class TelegramBot extends Telegram
 
             preg_match('/.*@' . $this->getBotUsername() . '\[(.*)\].*/', $group_description, $matches);
 
+            $settings = [];
             if (isset($matches[1])) {
                 try {
                     $settings = \GuzzleHttp\json_decode($matches[1], true);
                 } catch (InvalidArgumentException $e) {
                     return null;
                 }
-
-                $this->memcache->set('settings:' . $chat_id, $settings, null, 3600);
-
-                return $settings;
             }
 
-            return [];
+            $this->memcache->set('settings:' . $chat_id, $settings, null, 3600);
+
+            return $settings;
         }
 
         return false;
