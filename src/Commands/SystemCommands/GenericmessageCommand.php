@@ -226,7 +226,32 @@ class GenericmessageCommand extends SystemCommand
 
                 $request_data = null;
                 if ($result->isOk()) {
-                    $request_data = file_get_contents('https://api.telegram.org/file/bot' . $this->getTelegram()->getApiKey() . '/' . $result->getResult()->getFilePath());
+                    $remote_file = 'https://api.telegram.org/file/bot' . $this->getTelegram()->getApiKey() . '/' . $result->getResult()->getFilePath();
+
+                    if ($rfp = @fopen($remote_file, 'rb')) {
+                        $request_data = '';
+
+                        $request_data_size = 0;
+                        while (!feof($rfp) && $request_data_size <= self::MAX_DOCUMENT_SIZE) {
+                            $chunk = fread($rfp, 8192);
+                            $request_data .= $chunk;
+                            $request_data_size += strlen($chunk);
+                        }
+                        fclose($rfp);
+
+                        if ($request_data_size > self::MAX_DOCUMENT_SIZE) {
+                            $request_data = null;
+
+                            return Request::sendMessage(
+                                [
+                                    'chat_id'             => $this->getMessage()->getChat()->getId(),
+                                    'reply_to_message_id' => $this->getMessage()->getMessageId(),
+                                    'text'                => '*Error:* File exceeds 5MB file size limit!',
+                                    'parse_mode'          => 'markdown',
+                                ]
+                            );
+                        }
+                    }
                 }
 
                 if ($request_data === null) {
