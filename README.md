@@ -1,6 +1,6 @@
 # e621 bot for Telegram
 
-Simple Telegram bot that serves images from [e621.net](https://e621.net) image board, provides basic functionality known from discontinued **[e621 Search](https://telegram.me/e621searchbot)** bot (which is now replaced by this one).
+Simple Telegram bot that serves images from [e621.net](https://e621.net) image board.
 
 #### Features
 - Inline search (`@bot_username tags` in any chat), supports e621 links
